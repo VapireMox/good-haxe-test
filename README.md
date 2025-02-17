@@ -1,1 +1,2 @@
 # good-haxe-test
+Nothing
