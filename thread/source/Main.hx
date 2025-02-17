@@ -8,6 +8,6 @@ class Main {
         Sys.sleep(1);
       }
     });
-    Sys.sleep(3);
+    Sys.sleep(5);
   }
 }
