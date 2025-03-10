@@ -9,7 +9,6 @@ class Main {
   static macro function parseExpr(content:String) {
     var sb = Context.parse(content, Context.currentPos());
 
-    Context.defineType(sb);
     return sb;
   }
 }
