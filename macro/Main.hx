@@ -5,12 +5,11 @@ class Main {
   static function main() {
     trace(parseExpr("
 class Test {
-  public function new() {}
 }
     "));
   }
 
-  static function parseExpr(content:String) {
+  static function parseExpr(content:String):Expr {
     return Context.parse(content, Context.currentPos());
   }
 }
