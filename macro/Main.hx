@@ -9,7 +9,7 @@ class Test {
     "));
   }
 
-  static function parseExpr(content:String):Expr {
+  static macro function parseExpr(content:String):Expr {
     return Context.parse(content, Context.currentPos());
   }
 }
