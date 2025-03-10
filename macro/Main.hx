@@ -3,7 +3,7 @@ import haxe.macro.Context;
 
 class Main {
   static function main() {
-    trace(parsrExpr("
+    trace(parseExpr("
 class Test {
   public function new() {}
 }
