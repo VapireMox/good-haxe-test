@@ -3,7 +3,7 @@ import haxe.macro.Context;
 
 class Main {
   static function main() {
-    trace(parseExpr(""));
+    trace(parseExpr("trace('sb')"));
   }
 
   static macro function parseExpr(content:String):Expr {
