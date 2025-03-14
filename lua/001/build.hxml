@@ -1,1 +1,8 @@
+-lib linc_luajit
+-main Main
+--cpp bin/001/cpp/
 
+-D linux
+-D HXCPP_M64
+
+-cmd ./bin/001/cpp/Main
