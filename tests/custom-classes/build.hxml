@@ -1,0 +1,14 @@
+-D hscriptPos
+-D CUSTOM_CLASSES
+--library hscript-improved
+
+--class-path src
+-main Main
+
+--macro hscript.macros.UsingHandler.init()
+--macro hscript.macros.ClassExtendMacro.init()
+--macro hscript.macros.AbstractHandler.init()
+
+--cpp export/cpp
+--cmd cd export/cpp
+--cmd ./Main

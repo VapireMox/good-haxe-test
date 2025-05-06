@@ -1,0 +1,35 @@
+name: HL_Main
+
+on:
+  push:
+    branch: [HL]
+
+  workflow_dispatch:
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        targetDir: ["custom-classes"]
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.5
+
+      - name: Install Libraries
+        run: |
+          mkdir .haxelib && haxelib setup ./.haxelib
+
+          haxelib install hxcpp
+          haxelib git clone https://github.com/VapireMox/hscript-improved codename-dev-dev
+
+      - name: Testing Codes
+        run: |
+          cd tests/${{ matrix.targetDir }}
+          haxe build.hxml
