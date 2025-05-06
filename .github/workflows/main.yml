@@ -2,8 +2,8 @@ name: HL_Main
 
 on:
   push:
-    branch: [HL]
-  
+    branches: [HL]
+
   workflow_dispatch:
 
 jobs:
