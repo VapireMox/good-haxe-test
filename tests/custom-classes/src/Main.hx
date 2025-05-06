@@ -7,7 +7,7 @@ class Main {
 	static final code:String = '
 class Test extends ExtendedA {
 	public function new(c:BYD) {
-		super(c)
+		super(c);
 	}
 }
 
