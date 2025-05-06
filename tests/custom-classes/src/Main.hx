@@ -2,7 +2,7 @@ import hscript.Interp;
 import hscript.Parser;
 
 class Main {
-	static final var code:String = '
+	static final code:String = '
 class Test extends ExtendedA {
 	public function new(c:BYD) {
 		super(c)
