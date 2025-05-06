@@ -22,6 +22,16 @@ jobs:
         with:
           haxe-version: 4.2.5
 
+      - name: Caching Fox...
+        uses: actions/cache@v3
+        with:
+          key: cache-fox-${{ matrix.targetDir }}
+          path: |
+            tests/${{ matrix.targetDir }}/export/cpp/src/
+            tests/${{ matrix.targetDir }}/export/cpp/obj/
+          restore-keys: |
+            cache-fox-${{ matrix.targetDir }}
+
       - name: Install Libraries
         run: |
           mkdir .haxelib && haxelib setup ./.haxelib
