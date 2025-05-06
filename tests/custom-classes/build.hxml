@@ -11,4 +11,5 @@
 
 --cpp export/cpp
 --cmd cd export/cpp
+--cmd ls
 --cmd ./Main

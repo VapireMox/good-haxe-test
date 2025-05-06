@@ -16,6 +16,15 @@ var test = new Test({
 	y: 0.01,
 	d: {}
 });
+trace(test.b);
+test.b += "b";
+
+trace(test.y);
+test.y += 1;
+
+trace(test.d);
+Reflect.setField(test.d, "th", "Thanks For The World");
+
 trace(test);
 	';
 
@@ -24,6 +33,7 @@ trace(test);
 		var parser = new Parser();
 		parser.allowMetadata = parser.allowTypes = parser.allowJSON = true;
 
+		interp.variables.set("Reflect", Reflect);
 		interp.variables.set("ExtendedA", tests.ExtendedA);
 
 		interp.execute(parser.parseString(code));
