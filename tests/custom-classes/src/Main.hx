@@ -2,6 +2,7 @@ package;
 
 import hscript.Interp;
 import hscript.Parser;
+import hscript.Expr;
 
 class Main {
 	static final code:String = '
@@ -30,6 +31,7 @@ trace(test);
 
 	public static function main() {
 		var interp = new Interp();
+		interp.errorHandler = errorHandler;
 		var parser = new Parser();
 		parser.allowMetadata = parser.allowTypes = parser.allowJSON = true;
 
@@ -37,5 +39,9 @@ trace(test);
 		interp.variables.set("ExtendedA", tests.ExtendedA);
 
 		interp.execute(parser.parseString(code));
+	}
+
+	private static function errorHandler(error:Error) {
+		Sys.print(error);
 	}
 }
