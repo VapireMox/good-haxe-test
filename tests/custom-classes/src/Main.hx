@@ -9,6 +9,8 @@ class Main {
 class Test extends ExtendedA {
 	public function new(c:BYD) {
 		super(c);
+
+		b += "byd";
 	}
 }
 
@@ -42,6 +44,6 @@ trace(test);
 	}
 
 	private static function errorHandler(error:Error) {
-		Sys.print(error);
+		Sys.print('HScript Error: $error');
 	}
 }
