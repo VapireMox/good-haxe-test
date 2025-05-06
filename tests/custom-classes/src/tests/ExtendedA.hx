@@ -1,3 +1,5 @@
+package tests;
+
 class ExtendedA {
 	public var a:Int = -1;
 

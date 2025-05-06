@@ -1,3 +1,5 @@
+package;
+
 import hscript.Interp;
 import hscript.Parser;
 
