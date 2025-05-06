@@ -26,8 +26,8 @@ jobs:
         run: |
           mkdir .haxelib && haxelib setup ./.haxelib
 
-          haxelib install hxcpp
-          haxelib git clone https://github.com/VapireMox/hscript-improved codename-dev-dev
+          haxelib install hxcpp --quiet
+          haxelib git hscript-improved https://github.com/VapireMox/hscript-improved codename-dev-dev
 
       - name: Testing Codes
         run: |
