@@ -41,6 +41,13 @@ trace(test);
 		interp.variables.set("ExtendedA", tests.ExtendedA);
 
 		interp.execute(parser.parseString(code));
+
+		var obj = {};
+		try {
+			Reflect.setProperty(obj, "sb", 114514);
+		} catch(e:Dynamic) {
+			trace(Std.string(e));
+		}
 	}
 
 	private static function errorHandler(error:Error) {

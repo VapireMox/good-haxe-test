@@ -27,8 +27,7 @@ jobs:
         with:
           key: cache-fox-${{ matrix.targetDir }}
           path: |
-            tests/${{ matrix.targetDir }}/export/cpp/src/
-            tests/${{ matrix.targetDir }}/export/cpp/obj/
+            tests/${{ matrix.targetDir }}/export/cpp/
           restore-keys: |
             cache-fox-${{ matrix.targetDir }}
 
