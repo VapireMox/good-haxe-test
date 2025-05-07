@@ -13,6 +13,8 @@ class Test extends ExtendedA {
 		this.b += "byd";
 		this.y += 1;
 		Reflect.setField(this.d, "th", "Thanks For The World");
+
+		trace(Reflect.getProperty(this));
 	}
 }
 
