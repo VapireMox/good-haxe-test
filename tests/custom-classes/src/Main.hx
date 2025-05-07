@@ -24,6 +24,9 @@ var test = new Test({
 	y: 0.01,
 	d: {}
 });
+test.b = "The World! JS";
+test.y = 114514;
+Reflect.setField(test.d, "light", 87);
 
 trace(test);
 	';
