@@ -12,7 +12,7 @@ class Test extends ExtendedA {
 
 		this.b += "byd";
 		this.y += 1;
-		Reflect.setField(test.d, "th", "Thanks For The World");
+		Reflect.setField(this.d, "th", "Thanks For The World");
 	}
 }
 
