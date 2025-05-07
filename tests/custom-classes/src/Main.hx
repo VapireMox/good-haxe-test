@@ -14,7 +14,7 @@ class Test extends ExtendedA {
 		this.y += 1;
 		Reflect.setField(this.d, "th", "Thanks For The World");
 
-		trace(Reflect.getProperty(this));
+		trace(Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this))));
 	}
 }
 
@@ -33,6 +33,7 @@ trace(test);
 		var parser = new Parser();
 		parser.allowMetadata = parser.allowTypes = parser.allowJSON = true;
 
+		interp.variables.set("Type", Type);
 		interp.variables.set("Reflect", Reflect);
 		interp.variables.set("ExtendedA", tests.ExtendedA);
 
