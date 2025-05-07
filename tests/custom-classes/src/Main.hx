@@ -10,7 +10,9 @@ class Test extends ExtendedA {
 	public function new(c:BYD) {
 		super(c);
 
-		b += "byd";
+		this.b += "byd";
+		this.y += 1;
+		Reflect.setField(test.d, "th", "Thanks For The World");
 	}
 }
 
@@ -19,14 +21,6 @@ var test = new Test({
 	y: 0.01,
 	d: {}
 });
-trace(test.b);
-test.b += "b";
-
-trace(test.y);
-test.y += 1;
-
-trace(test.d);
-Reflect.setField(test.d, "th", "Thanks For The World");
 
 trace(test);
 	';
