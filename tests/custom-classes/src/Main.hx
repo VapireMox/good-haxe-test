@@ -60,6 +60,7 @@ trace(Reflect.compare(abab.allowStaticAccessClasses, sb.allowStaticAccessClasses
 
 trace(Test.makePublic());
 trace(Test1.quelSB());
+new Test1();
 
 trace(Test.yourDad);
 trace(test.shift);
