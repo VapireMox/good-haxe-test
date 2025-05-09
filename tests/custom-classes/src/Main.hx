@@ -30,7 +30,7 @@ Reflect.setField(test.d, "light", 87);
 
 trace(test);
 	';
-//
+
 	public static function main() {
 		var interp = new Interp();
 		interp.errorHandler = errorHandler;
