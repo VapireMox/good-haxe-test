@@ -5,6 +5,7 @@
 --class-path src
 -main Main
 
+# unuseful
 #--macro hscript.macros.AbstractHandler.init()
 #--macro hscript.macros.UsingMacro.init()
 #--macro hscript.macros.ClassExtendMacro.init()

@@ -7,6 +7,8 @@ import hscript.Expr;
 class Main {
 	static final code:String = '
 class Test extends ExtendedA {
+	private var shift:Int = -1;
+
 	public function new(c:BYD) {
 		super(c);
 
@@ -29,6 +31,8 @@ test.y = 114514;
 Reflect.setField(test.d, "light", 87);
 
 trace(test);
+
+trace(test.shift);
 	';
 
 	public static function main() {
