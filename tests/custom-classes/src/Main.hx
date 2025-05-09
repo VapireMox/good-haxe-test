@@ -15,9 +15,6 @@ class Test extends ExtendedA {
 		this.b += "byd";
 		this.y += 1;
 		Reflect.setField(this.d, "th", "Thanks For The World");
-
-		//s
-		trace(Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this))));
 	}
 }
 
@@ -31,6 +28,7 @@ test.y = 114514;
 Reflect.setField(test.d, "light", 87);
 
 trace(test);
+trace(Reflect.compare(Reflect.getProperty(test, "interp").allowStaticAccessClasses, Reflect.getProperty(Test, "interp").allowStaticAccessClasses));
 
 trace(test.shift);
 	';
