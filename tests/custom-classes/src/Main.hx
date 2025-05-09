@@ -25,6 +25,20 @@ class Test extends ExtendedA {
 	}
 }
 
+class Test1 {
+	public static function quelSB() {
+		return Test.yourDad + " & GeXie";
+	}
+
+	public var test:Test;
+
+	public function new() {
+		test = new Test({b: "bbq", y: 3.14, d: "wow o!"});
+		test.shift += 10;
+		trace(test.shift);
+	}
+}
+
 var test = new Test({
 	b: "ak",
 	y: 0.01,
@@ -45,6 +59,7 @@ trace(sb);
 trace(Reflect.compare(abab.allowStaticAccessClasses, sb.allowStaticAccessClasses));
 
 trace(Test.makePublic());
+trace(Test1.quelSB);
 
 trace(Test.yourDad);
 trace(test.shift);
