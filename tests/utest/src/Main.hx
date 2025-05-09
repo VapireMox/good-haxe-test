@@ -9,6 +9,6 @@ class Main {
 	}
 
 	static function onComplete() {
-		trace("Test Finish");
+		trace("Input Finished...");
 	}
 }
