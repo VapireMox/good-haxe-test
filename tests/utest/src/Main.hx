@@ -1,14 +1,15 @@
 package;
 
-import utest.UTest;
+import utest.Runner;
+import utest.ui.Report;
 import tests.*;
 
 class Main {
 	public static function main() {
-		UTest.run([new TestA()], onComplete);
-	}
+		var runner = new Runner();
+		runner.addCase(new TestA());
+		Report.create(runner);
 
-	static function onComplete() {
-		trace("Input Finished...");
+		runner.run();
 	}
 }
