@@ -38,3 +38,31 @@ jobs:
         run: |
           cd tests/${{ matrix.targetDir }}
           haxe build.hxml
+
+      - name: Clearing already existing cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+            for (const cache of caches.data.actions_caches) {
+              if (cache.key == "cache-fox-${{ matrix.targetDir }}") {
+                console.log('Clearing ' + cache.key + '...')
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id,
+                })
+                console.log("Cache cleared.")
+              }
+            }
+      - name: Uploading new cache
+        uses: actions/cache@v3
+        with:
+          key: cache-fox-${{ matrix.targetDir }}
+          path: |
+            tests/${{ matrix.targetDir }}/export/cpp/
+          restore-keys: |
+            cache-fox-${{ matrix.targetDir }}
