@@ -16,7 +16,7 @@ class Test extends ExtendedA {
 		this.y += 1;
 		Reflect.setField(this.d, "th", "Thanks For The World");
 
-		//js
+		//s
 		trace(Reflect.fields(this).concat(Type.getInstanceFields(Type.getClass(this))));
 	}
 }
