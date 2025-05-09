@@ -5,7 +5,7 @@ import utest.Test;
 
 class TestA extends Test {
 	public function new() {
-	
+		super();
 	}
 
 	public function firstTest() {
