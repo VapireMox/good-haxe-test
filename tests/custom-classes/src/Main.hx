@@ -7,10 +7,17 @@ import hscript.Expr;
 class Main {
 	static final code:String = '
 class Test extends ExtendedA {
+	private static var yourDad:String = "GeXue";
+	public static function makePublic() {
+		return yourDad;
+	}
+
 	private var shift:Int = -1;
 
 	public function new(c:BYD) {
 		super(c);
+
+		shift += 1;
 
 		this.b += "byd";
 		this.y += 1;
@@ -37,6 +44,9 @@ trace(sb);
 
 trace(Reflect.compare(abab.allowStaticAccessClasses, sb.allowStaticAccessClasses));
 
+trace(Test.makePublic());
+
+trace(Test.yourDad);
 trace(test.shift);
 	';
 
