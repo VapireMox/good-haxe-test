@@ -1,0 +1,8 @@
+--library utest
+
+--class-path src
+-main Main
+
+--cpp export/cpp
+--cmd cd export/cpp
+--cmd ./Main

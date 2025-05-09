@@ -1,12 +1,17 @@
-name: Main
+name: UTest
 
-on: [push, workflow_dispatch]
+on:
+  push:
+  	branches: ["utest"]
+  workflow_dispatch:
 
 jobs:
   Build:
     strategy:
       matrix:
-        targetDir: ["custom-classes"]
+        targetDir: ["utest"]
+        executableFile: ["build.hxml"]
+      fail-fast: false
 
     runs-on: ubuntu-latest
     steps:
@@ -18,32 +23,14 @@ jobs:
         with:
           haxe-version: 4.2.5
 
-      - name: Caching Fox...
-        uses: actions/cache@v3
-        with:
-          key: cache-fox-${{ matrix.targetDir }}
-          path: |
-            tests/${{ matrix.targetDir }}/export/cpp/
-          restore-keys: |
-            cache-fox-${{ matrix.targetDir }}
-
       - name: Install Libraries
         run: |
           mkdir .haxelib && haxelib setup ./.haxelib
 
           haxelib install hxcpp --quiet
-          haxelib git hscript-improved https://github.com/VapireMox/hscript-improved codename-dev-dev
+          haxelib install utest --quiet
 
       - name: Testing Codes
         run: |
           cd tests/${{ matrix.targetDir }}
-          haxe build.hxml
-
-      - name: Caching New Fox...
-        uses: actions/cache@v3
-        with:
-          key: cache-fox-${{ matrix.targetDir }}
-          path: |
-            tests/${{ matrix.targetDir }}/export/cpp/
-          restore-keys: |
-            cache-fox-${{ matrix.targetDir }}
+          haxe ${{ matrix.executableFile }}
