@@ -59,7 +59,7 @@ trace(sb);
 trace(Reflect.compare(abab.allowStaticAccessClasses, sb.allowStaticAccessClasses));
 
 trace(Test.makePublic());
-trace(Test1.quelSB);
+trace(Test1.quelSB());
 
 trace(Test.yourDad);
 trace(test.shift);
