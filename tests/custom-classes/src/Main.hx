@@ -28,7 +28,14 @@ test.y = 114514;
 Reflect.setField(test.d, "light", 87);
 
 trace(test);
-trace(Reflect.compare(Reflect.getProperty(test, "interp").allowStaticAccessClasses, Reflect.getProperty(Test, "staticInterp").allowStaticAccessClasses));
+
+final abab = Reflect.getProperty(Reflect.getProperty(test, "__customClass"), "interp");
+trace(abab);
+
+final sb = Reflect.getProperty(Test, "staticInterp");
+trace(sb);
+
+trace(Reflect.compare(abab.allowStaticAccessClasses, sb.allowStaticAccessClasses));
 
 trace(test.shift);
 	';
