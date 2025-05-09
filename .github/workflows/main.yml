@@ -2,7 +2,7 @@ name: UTest
 
 on:
   push:
-  	branches: ["utest"]
+    branches: ["utest"]
   workflow_dispatch:
 
 jobs:
