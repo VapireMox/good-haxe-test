@@ -23,13 +23,14 @@ jobs:
         with:
           key: cache-fox-${{ matrix.targetDir }}
           path: |
+            .haxelib/
             tests/${{ matrix.targetDir }}/export/
           restore-keys: |
             cache-fox-${{ matrix.targetDir }}
 
       - name: Install Libraries
         run: |
-          mkdir .haxelib && haxelib setup ./.haxelib
+          haxelib setup ./.haxelib
 
           haxelib install hxcpp --quiet
           haxelib install utest --quiet
