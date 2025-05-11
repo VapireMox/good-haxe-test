@@ -39,12 +39,3 @@ jobs:
         run: |
           cd tests/${{ matrix.targetDir }}
           haxe build.hxml
-
-      - name: Caching New Fox...
-        uses: actions/cache@v3
-        with:
-          key: cache-fox-${{ matrix.targetDir }}
-          path: |
-            tests/${{ matrix.targetDir }}/export/cpp/
-          restore-keys: |
-            cache-fox-${{ matrix.targetDir }}
