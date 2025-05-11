@@ -3,16 +3,19 @@ package hscript;
 class Config {
 	// Runs support for custom classes in these
 	public static final ALLOWED_CUSTOM_CLASSES = [
-		"tests",
+		"plugins",
 	];
 
 	// Runs support for abstract support in these
 	public static final ALLOWED_ABSTRACT_AND_ENUM = [
+		"flixel",
+		"openfl.display.BlendMode",
 	];
 
 	// Runs support for using in specific classes. 
 	public static final ALLOWED_USING = [
 		"StringTools",
+		"Lamdba",
 	];
 
 	// Incase any of your files fail
