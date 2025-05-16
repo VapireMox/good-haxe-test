@@ -12,6 +12,7 @@ class Main {
 		runner.addCase(new CustomEnumCase());
 		runner.addCase(new ClassAndEnumCase());
 
+  //b
 		Report.create(runner);
 		runner.run();
 	}
