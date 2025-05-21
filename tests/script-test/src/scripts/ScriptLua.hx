@@ -1,9 +1,9 @@
 package scripts;
 
 #if ALLOW_LUASCRIPT
-import hxlua.Types;
-import hxlua.LuaL;
-import hxlua.Lua;
+import hxluajit.Types;
+import hxluajit.LuaL;
+import hxluajit.Lua;
 import scripts.luas.LuaUtil;
 import scripts.luas.LuaCallbackManager;
 #end
@@ -14,8 +14,9 @@ import sys.io.File;
 using StringTools;
 
 #if ALLOW_LUASCRIPT
-using hxlua.Lua;
-using hxlua.LuaL;
+using hxluajit.Lua;
+using hxluajit.LuaL;
+using scripts.luas.LuaUtil;
 #end
 
 /**
@@ -31,7 +32,7 @@ class ScriptLua extends ScriptBase {
 	 */
 	public static var focusOn(default, null):ScriptLua = null;
 
-	static var debug: #if ALLOW_LUASCRIPT Lua_Debug = Lua_Debug.create() #else Dynamic = null #end;
+	static var debug: #if ALLOW_LUASCRIPT Lua_Debug = new Lua_Debug() #else Dynamic = null #end;
 
 	/**
 	 * 用于lua的虚拟交互（然后被调教成布尔值了）
@@ -102,7 +103,7 @@ class ScriptLua extends ScriptBase {
 						return null;
 					}
 
-					ret = LuaUtil.callFunctionWithoutName(heart, (args == null ? [] : args));
+					ret = heart.callFunctionWithoutName((args == null ? [] : args));
 					ret = {
 						if(ret.length == 1) ret[0];
 							else if(ret.length == 0) null;
@@ -121,7 +122,7 @@ class ScriptLua extends ScriptBase {
 							if(heart.istable(-1) != 1) break;
 						} else {
 							if(heart.type(-1) == Lua.TFUNCTION) {
-								ret = LuaUtil.callFunctionWithoutName(heart, (args == null ? [] : args));
+								ret = heart.callFunctionWithoutName((args == null ? [] : args));
 								//LuaUtil.callFunctionWithoutName会自动清除栈顶的值，需要判断
 								called = true;
 
@@ -157,7 +158,7 @@ class ScriptLua extends ScriptBase {
 				if(split.length == 1) {
 					final oldtop = heart.gettop();
 					heart.getglobal(name);
-					ret = LuaUtil.convertFromLua(this.heart, -1);
+					ret = heart.convertFromLua(-1);
 
 					heart.pop(1);
 				} else {
@@ -172,7 +173,7 @@ class ScriptLua extends ScriptBase {
 						if(index < split.length - 1) {
 							if(heart.istable(-1) != 1) break;
 						} else {
-							ret = LuaUtil.convertFromLua(this.heart, -1);
+							ret = heart.convertFromLua(-1);
 						}
 					}
 					heart.pop(1);
@@ -198,7 +199,7 @@ class ScriptLua extends ScriptBase {
 		if(split.length > 0) {
 			if(split.length == 1) {
 				if(!Reflect.isFunction(value)) {
-					LuaUtil.convertToLua(this.heart, value);
+					heart.convertToLua(value);
 					heart.setglobal(name);
 				} else {
 					LuaCallbackManager.addCallback(this, name, value);
@@ -239,8 +240,8 @@ class ScriptLua extends ScriptBase {
 				focusOn = this;
 				if(heart.gettop() > origin) {
 					final count:Int = Std.int(Math.abs(heart.gettop() - origin));
-					if(count == 1) ret = LuaUtil.convertFromLua(this.heart, -1);
-					else ret = [for(i in 1...(count + 1)) LuaUtil.convertFromLua(this.heart, -i)];
+					if(count == 1) ret = heart.convertFromLua(-1);
+					else ret = [for(i in 1...(count + 1)) heart.convertFromLua(-i)];
 
 					heart.pop(count);
 				}

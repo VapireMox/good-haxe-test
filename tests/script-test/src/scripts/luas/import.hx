@@ -1,7 +1,8 @@
 #if (!macro && ALLOW_LUASCRIPT)
-import hxlua.Types;
-import hxlua.Lua;
-import hxlua.LuaL;
+import hxluajit.Types;
+import hxluajit.Lua;
+import hxluajit.LuaL;
 
-using hxlua.Lua;
+using hxluajit.Lua;
+using scripts.luas.LuaUtil;
 #end

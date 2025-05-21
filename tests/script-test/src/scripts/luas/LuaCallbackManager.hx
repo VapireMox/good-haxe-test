@@ -105,7 +105,7 @@ class LuaCallbackManager {
 
 	#if ALLOW_LUASCRIPT
 	@:noCompletion @:noUsing private static function callbackHandler(byd:LuaState) {
-		final tag = LuaUtil.convertFromLua(byd, Lua.upvalueindex(1));
+		final tag = byd.convertFromLua(Lua.upvalueindex(1));
 		if(tag != null && tag is String) {
 			final funcMap = luaCallbacks.get(tag.substr(0, tag.lastIndexOf(":")));
 			var name:String = tag.substring(tag.lastIndexOf(":") + 1);
@@ -114,7 +114,7 @@ class LuaCallbackManager {
 				var args:Array<Dynamic> = [];
 
 				for(at in 1...n + 1) {
-					args.push(LuaUtil.convertFromLua(byd, at));
+					args.push(byd.convertFromLua(at));
 				}
 
 				var ret:Dynamic = null;
@@ -124,7 +124,7 @@ class LuaCallbackManager {
 					default:
 						ret = Reflect.callMethod(null, funcMap.get(name), args);
 				}
-				LuaUtil.convertToLua(byd, ret);
+				byd.convertToLua(ret);
 				return 1;
 			}
 		}

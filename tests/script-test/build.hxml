@@ -11,7 +11,7 @@
 	-L hscript-improved
 #end
 #if ALLOW_LUASCRIPT
-	-L hxlua
+	-L hxluajit
 #end
 
 -cp src

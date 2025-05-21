@@ -5,7 +5,7 @@ import scripts.ScriptGroup;
 import scripts.ScriptLua;
 #if ALLOW_LUASCRIPT
 import scripts.luas.LuaState;
-import hxlua.Lua;
+import hxluajit.Lua;
 #end
 
 class Main {

@@ -20,7 +20,7 @@ class LuaUtil {
 		//排除已经在栈顶的function
 		final origin:Int = byd.gettop() - 1;
 		for (arg in args)
-			LuaUtil.convertToLua(byd, arg);
+			byd.convertToLua(arg);
 
 		final status:Int = byd.pcall(args.length, Lua.MULTRET, 0);
 
@@ -42,7 +42,7 @@ class LuaUtil {
 			if(count > origin) {
 				final xd:Int = Std.int(Math.abs(count - origin));
 				for (i in 1...(xd + 1))
-					args.push(LuaUtil.convertFromLua(byd, -i));
+					args.push(byd.convertFromLua(-i));
 
 					byd.pop(xd);
 			}
@@ -101,46 +101,75 @@ class LuaUtil {
 		#end
 	}
 
+	/**
+	 * 由于某些不可抗因素（SB_JIT只支持到lua5.1），只能现做当活阎王了（lua_absindex在5.2添加的）
+	 * @param byd		  虚拟交互机
+	 * @param idx		  栈数
+	 * @return				  返回栈数的绝对值
+	 */
+	public inline static function absindex(byd:LuaState, idx:Int):Int {
+		#if ALLOW_LUASCRIPT
+		if(idx < 0) idx += byd.gettop() + 1;
+		#end
+		return idx;
+	}
+
+	/**
+	 * 由于某些不可抗因素（SB_JIT只支持到lua5.1），只能现做当活阎王了（lua_isinteger在5.3添加的）
+	 * @param byd		  虚拟交互机
+	 * @param idx		  栈数
+	 * @return				  返回1就是true，否则为false
+	 */
+	public inline static function isinteger(byd:LuaState, idx:Int):Int {
+		#if ALLOW_LUASCRIPT
+		if(byd.isnumber(idx) != 1) return 0;
+		final origin = byd.tonumber(idx);
+		return (origin == Std.int(origin) ? 1 : 0);
+		#else
+		return 0;
+		#end
+	}
+
 	#if ALLOW_LUASCRIPT
-	@:noCompletion static function convertMapToLuaTable(byd:LuaState, map:haxe.Constraints.IMap<Dynamic, Dynamic>) {
+	@:noUsing @:noCompletion static function convertMapToLuaTable(byd:LuaState, map:haxe.Constraints.IMap<Dynamic, Dynamic>) {
 		byd.createtable(0, map.count());
 		for(key=>value in map) {
-			LuaUtil.convertToLua(byd, key);
-			LuaUtil.convertToLua(byd, value);
+			byd.convertToLua(key);
+			byd.convertToLua(value);
 			byd.settable(-3);
 		}
 	}
 
-	@:noCompletion static function convertObjectToLuaTable(byd:LuaState, object:Dynamic) {
+	@:noUsing @:noCompletion static function convertObjectToLuaTable(byd:LuaState, object:Dynamic) {
 		final fields:Array<String> = Reflect.fields(object);
 
 		if(fields.length > 0) {
 			byd.createtable(0, fields.length);
 			for(field in fields) {
 				byd.pushstring(field);
-				LuaUtil.convertToLua(byd, Reflect.field(object, field));
+				byd.convertToLua(Reflect.field(object, field));
 				byd.settable(-3);
 			}
 		}
 	}
 
-	@:noCompletion static function convertArrayToLuaTable(byd:LuaState, array:Array<Dynamic>) {
+	@:noUsing @:noCompletion static function convertArrayToLuaTable(byd:LuaState, array:Array<Dynamic>) {
 		byd.createtable(0, array.length);
 		for(key=>ar in array) {
 			byd.pushinteger(cast (key + 1));
-			LuaUtil.convertToLua(byd, ar);
+			byd.convertToLua(ar);
 			byd.settable(-3);
 		}
 	}
 
-	@:noCompletion static function convertFromLuaTable(byd:LuaState, idx:Int):Dynamic {
+	@:noUsing @:noCompletion static function convertFromLuaTable(byd:LuaState, idx:Int):Dynamic {
 		if(sureConvertTableToArray(byd, idx)) {
 			var arr:Array<Dynamic> = [];
 
 			if(idx < 0) idx = byd.absindex(idx);
 			byd.pushnil();
 			while(byd.next(idx) != 0) {
-				arr.push(LuaUtil.convertFromLua(byd, -1));
+				arr.push(byd.convertFromLua(-1));
 				byd.pop(1);
 			}
 
@@ -151,7 +180,7 @@ class LuaUtil {
 			if(idx < 0) idx = byd.absindex(idx);
 			byd.pushnil();
 			while(byd.next(idx) != 0) {
-				table.set(LuaUtil.convertFromLua(byd, -2), LuaUtil.convertFromLua(byd, -1));
+				table.set(byd.convertFromLua(-2), byd.convertFromLua(-1));
 				byd.pop(1);
 			}
 
@@ -161,7 +190,7 @@ class LuaUtil {
 		return null;
 	}
 
-	@:noCompletion static inline function sureConvertTableToArray(byd:LuaState, idx:Int):Bool {
+	@:noUsing @:noCompletion static inline function sureConvertTableToArray(byd:LuaState, idx:Int):Bool {
 		var useArray:Bool = false;
 
 		if(idx < 0) idx = byd.absindex(idx);
