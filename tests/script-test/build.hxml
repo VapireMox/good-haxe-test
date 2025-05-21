@@ -1,0 +1,20 @@
+-D analyzer-optimize
+#if cpp
+	-D ALLOW_LUASCRIPT
+#end
+#if (neko || cpp)
+	-D ALLOW_HSCRIPT
+#end
+#if ALLOW_HSCRIPT
+	-D hscriptPos
+	-D CUSTOM_CLASSES
+	-L hscript-improved
+#end
+#if ALLOW_LUASCRIPT
+	-L hxlua
+#end
+
+-cp src
+--main Main
+--cpp export/cpp
+--cmd ./export/cpp/Main
