@@ -69,10 +69,12 @@ class ScriptHaxe extends ScriptBase {
 		}
 		#end
 
+		#if ALLOW_HSCRIPT
 		set("trace", Reflect.makeVarArgs(function(content:Dynamic) {
 			var info = interp.posInfos();
 			this.trace(content, {name: info.fileName, line: info.lineNumber, prefixName: "HScript-Trace", prefixStyle: SAFE});
 		}));
+		#end
 		set("__sc__", this);
 	}
 

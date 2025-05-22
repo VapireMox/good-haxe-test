@@ -7,6 +7,7 @@ jobs:
     strategy:
       matrix:
         targetDir: ["script-test"]
+        builds: ["build", "noScriptBuild"]
 
     runs-on: ubuntu-latest
     steps:
@@ -38,4 +39,4 @@ jobs:
       - name: Testing Codes
         run: |
           cd tests/${{ matrix.targetDir }}
-          haxe build.hxml
+          haxe ${{ matrix.builds }}.hxml
