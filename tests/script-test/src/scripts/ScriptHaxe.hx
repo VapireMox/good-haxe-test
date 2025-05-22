@@ -11,8 +11,6 @@ import scripts.ScriptInfo;
 import sys.FileSystem;
 import sys.io.File;
 
-using StringTools;
-
 /**
  * 对于haxe脚本的管理，即hscript
  */
@@ -69,12 +67,14 @@ class ScriptHaxe extends ScriptBase {
 		}
 		#end
 
-		#if ALLOW_HSCRIPT
 		set("trace", Reflect.makeVarArgs(function(content:Dynamic) {
+			#if ALLOW_HSCRIPT
 			var info = interp.posInfos();
+			#else
+			var info = {fileName: this.path, lineNumber: 0};
+			#end
 			this.trace(content, {name: info.fileName, line: info.lineNumber, prefixName: "HScript-Trace", prefixStyle: SAFE});
 		}));
-		#end
 		set("__sc__", this);
 	}
 

@@ -4,8 +4,6 @@ import Type.ValueType;
 import scripts.ScriptLua;
 import haxe.DynamicAccess;
 
-using Lambda;
-
 /**
  * 孩子们，副本很好玩
  * @see https://github.com/MAJigsaw77/hxluajit-wrapper/blob/main/hxluajit/wrapper/LuaUtils.hx

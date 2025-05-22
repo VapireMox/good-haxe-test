@@ -1,11 +1,5 @@
-#if (neko || cpp)
-	-D ALLOW_HSCRIPT
-#end
-#if ALLOW_HSCRIPT
-	-D hscriptPos
-	-D CUSTOM_CLASSES
-	-L hscript-improved
-#end
+-D analyzer-optimize
+
 -cp src
 --main Main
 --cpp export/cpp

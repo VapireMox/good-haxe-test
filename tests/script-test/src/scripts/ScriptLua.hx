@@ -8,11 +8,8 @@ import scripts.luas.LuaUtil;
 #end
 import scripts.luas.LuaGuiseFunction;
 import scripts.luas.LuaCallbackManager;
-import scripts.luas.RawLuaState;
 import sys.FileSystem;
 import sys.io.File;
-
-using StringTools;
 
 #if ALLOW_LUASCRIPT
 using hxluajit.Lua;
@@ -33,12 +30,12 @@ class ScriptLua extends ScriptBase {
 	 */
 	public static var focusOn(default, null):ScriptLua = null;
 
-	static var debug: #if ALLOW_LUASCRIPT Lua_Debug = new Lua_Debug() #else Dynamic = null #end;
+	static var debug:LuaDebug #if ALLOW_LUASCRIPT = new Lua_Debug() #else = null #end;
 
 	/**
 	 * 用于lua的虚拟交互（然后被调教成布尔值了）
 	 */
-	public var heart(default, null):Null<RawLuaState>;
+	public var heart(default, null):RawLuaState;
 	public var callbackManager:LuaCallbackManager;
 	private var luaFunctions:Array<LuaGuiseFunction>;
 
@@ -53,7 +50,7 @@ class ScriptLua extends ScriptBase {
 		luaFunctions = [];
 		heart = LuaL.newstate();
 		heart.openlibs();
-		callbackManager = LuaCallbackManager.registerNewCallback(heart, this.toString());
+		callbackManager = LuaCallbackManager.registerNewCallback(heart);
 		#end
 	}
 
@@ -70,7 +67,7 @@ class ScriptLua extends ScriptBase {
 
 		#if ALLOW_LUASCRIPT
 		set("print", function(infoArgs:Array<Dynamic>) {
-			final stackDebug:cpp.RawPointer<Lua_Debug> = cpp.RawPointer.addressOf(debug);
+			final stackDebug:RawLuaDebug = cpp.RawPointer.addressOf(debug);
 			if(heart.getstack(1, stackDebug) == 1) {
 				heart.getinfo("l", stackDebug);
 			}

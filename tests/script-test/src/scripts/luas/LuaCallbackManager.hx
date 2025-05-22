@@ -5,30 +5,34 @@ import cpp.Pointer;
 #end
 import haxe.Constraints.Function;
 
-using StringTools;
-using Lambda;
-
 class LuaCallbackManager {
-	@:noCompletion static var _pool:Map<String, LuaCallbackManager> = new Map();
+	@:noCompletion private static var _pool:Map<Int, LuaCallbackManager> = new Map();
 
-	public static function registerNewCallback(byd:RawLuaState, tag:String):LuaCallbackManager {
+	public static function registerNewCallback(byd:RawLuaState, safety:Bool = true):LuaCallbackManager {
 		#if ALLOW_LUASCRIPT
 		var lsp:Pointer<Lua_State> = Pointer.fromRaw(byd);
+		var id:Int = Std.random(0xffffff);
+		while(safety && _pool.exists(id)) {
+			id = Std.random(0xffffff);
+		}
 		#else
 		var lsp = byd;
+		var id:Int = -1;
 		#end
-		var manager = new LuaCallbackManager(lsp, tag);
-		_pool.set(tag, manager);
+		var manager = new LuaCallbackManager(lsp, id);
+		#if ALLOW_LUASCRIPT
+		_pool.set(id, manager);
+		#end
 		return manager;
 	}
 
 	#if !ALLOW_LUASCRIPT
-	public var tag:String;
+	public var id(default, null):Int;
 	var lsp:RawLuaState;
 
-	private function new(lsp:RawLuaState, tag:String) {
+	private function new(lsp:RawLuaState, ref:Int) {
 		this.lsp = lsp;
-		this.tag = tag;
+		this.id = ref;
 	}
 
 	public function add(name:String, value:String, istable:Bool = false) {}
@@ -41,17 +45,19 @@ class LuaCallbackManager {
 
 	#else
 
-	public var tag:String;
+	public var id(default, null):Int;
 	var lsp:Pointer<Lua_State>;
 	var callbackReferences:Map<String, Function>;
 
-	private function new(lsp:Pointer<Lua_State>, tag:String) {
-		this.tag = tag;
+	private function new(lsp:Pointer<Lua_State>, ref:Int) {
+		this.id = ref;
 		this.lsp = lsp;
 		callbackReferences = new Map<String, Function>();
 	}
 
 	public function add(name:String, func:Function, fromtable:Bool = false) {
+		if(!_pool.exists(id)) return;
+
 		var byd:RawLuaState = lsp.raw;
 		var split:Array<String> = name.split(".");
 
@@ -68,7 +74,7 @@ class LuaCallbackManager {
 					if(byd.istable(-1) != 1) break;
 				} else {
 					callbackReferences.set(name, func);
-					byd.pushstring(tag);
+					byd.pushinteger(id);
 					byd.pushstring(name);
 					byd.pushcclosure(cpp.Function.fromStaticFunction(callbackHandler), 2);
 					byd.setfield(-2, key);
@@ -78,7 +84,7 @@ class LuaCallbackManager {
 		} else {
 			name = split[0];
 			callbackReferences.set(name, func);
-			byd.pushstring(tag);
+			byd.pushinteger(id);
 			byd.pushstring(name);
 			byd.pushcclosure(cpp.Function.fromStaticFunction(callbackHandler), 2);
 			byd.setglobal(name);
@@ -86,6 +92,8 @@ class LuaCallbackManager {
 	}
 
 	public function remove(name:String, fromtable:Bool = false) {
+		if(!_pool.exists(id)) return;
+
 		var byd:RawLuaState = lsp.raw;
 		var split:Array<String> = name.split(".");
 
@@ -129,7 +137,7 @@ class LuaCallbackManager {
 
 	public function dispose() {
 		clear();
-		if(_pool.exists(tag)) _pool.remove(tag);
+		if(_pool.exists(id)) _pool.remove(id);
 	}
 
 	public function clear() {
@@ -143,8 +151,7 @@ class LuaCallbackManager {
 	}
 
 	@:noCompletion @:noUsing private static function callbackHandler(byd:RawLuaState) {
-		var prefix = byd.tostring(Lua.upvalueindex(1));
-		if(prefix == null) return 0;
+		var prefix:Int = byd.tointeger(Lua.upvalueindex(1));
 
 		var tag = byd.tostring(Lua.upvalueindex(2));
 		if(tag != null) {

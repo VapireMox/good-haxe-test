@@ -156,9 +156,9 @@ class ScriptBase implements IScriptUsed {
 	function init() {}
 	function setup() {}
 	function onSet(name:String, value:Dynamic) {}
-	function onGet(name:String):Dynamic {throw haxe.exceptions.NotImplementedException;}
-	function execute():Dynamic {throw haxe.exceptions.NotImplementedException;}
-	function onCall(name:String, ?args:Array<Dynamic>):Dynamic {throw haxe.exceptions.NotImplementedException;}
+	function onGet(name:String):Dynamic {throw new haxe.exceptions.NotImplementedException();}
+	function execute():Dynamic {throw new haxe.exceptions.NotImplementedException();}
+	function onCall(name:String, ?args:Array<Dynamic>):Dynamic {throw new haxe.exceptions.NotImplementedException();}
 
 	public function toString():String {
 		return ScriptUtil.printScriptFieldString("SCRIPT-BASE", [

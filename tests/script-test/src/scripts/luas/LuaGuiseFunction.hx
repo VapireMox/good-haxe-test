@@ -51,7 +51,7 @@ class LuaGuiseFunction {
 	}
 
 	public function call(?args:Array<Dynamic>):Dynamic {
-		throw haxe.exceptions.NotImplementedException;
+		throw new haxe.exceptions.NotImplementedException();
 	}
 
 	public function destroy() {

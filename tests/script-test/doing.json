@@ -1,3 +1,3 @@
 {
-	"executes": ["build", "noScript"]
+	"executes": ["build", "noScriptBuild"]
 }

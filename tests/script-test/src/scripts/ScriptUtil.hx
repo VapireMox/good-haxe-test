@@ -4,8 +4,6 @@ import haxe.io.Path;
 import scripts.ScriptSortStyle;
 import sys.FileSystem;
 
-using Lambda;
-
 class ScriptUtil {
 	/**
 	 * 支持的脚本格式，可添加或重改
