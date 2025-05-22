@@ -1,135 +1,174 @@
 package scripts.luas;
 
+#if ALLOW_LUASCRIPT
+import cpp.Pointer;
+#end
 import haxe.Constraints.Function;
 
-/**
- * 你用个屁😂
- */
+using StringTools;
+using Lambda;
+
 class LuaCallbackManager {
-	private static final luaCallbacks:Map<String, Map<String, Function>> = [];
+	@:noCompletion static var _pool:Map<String, LuaCallbackManager> = new Map();
 
-	/**
-	 * 注册你的爷爷
-	 * @param sl		  爷爷
-	 */
-	public static function registerCallback(sl:ScriptLua) {
-		if(sl._closed) return;
-
-		if(!luaCallbacks.exists(sl.path)) {
-			luaCallbacks.set(sl.path, new Map<String, Function>());
-		}
+	public static function registerNewCallback(byd:RawLuaState, tag:String):LuaCallbackManager {
+		#if ALLOW_LUASCRIPT
+		var lsp:Pointer<Lua_State> = Pointer.fromRaw(byd);
+		#else
+		var lsp = byd;
+		#end
+		var manager = new LuaCallbackManager(lsp, tag);
+		_pool.set(tag, manager);
+		return manager;
 	}
 
-	/**
-	 * 添加你的爸爸
-	 * @param sl				  爷爷
-	 * @param name		  叔叔
-	 * @param func		  爸爸
-	 */
-	public static function addCallback(sl:ScriptLua, name:String, func:Function) {
-		if(sl._closed) return;
-		#if ALLOW_LUASCRIPT
-		final byd:LuaState = sl.heart;
+	#if !ALLOW_LUASCRIPT
+	public var tag:String;
+	var lsp:RawLuaState;
 
-		if(luaCallbacks.exists(sl.path)) {
-			final funcMap = luaCallbacks.get(sl.path);
+	private function new(lsp:RawLuaState, tag:String) {
+		this.lsp = lsp;
+		this.tag = tag;
+	}
 
-			funcMap.set(name, func);
-			byd.pushstring('${sl.path}:$name');
-			byd.pushcclosure(cpp.Function.fromStaticFunction(callbackHandler), 1);
+	public function add(name:String, value:String, istable:Bool = false) {}
+
+	public function remove(name:String, istable:Bool = false) {}
+
+	public function clear() {}
+
+	public function dispose() {}
+
+	#else
+
+	public var tag:String;
+	var lsp:Pointer<Lua_State>;
+	var callbackReferences:Map<String, Function>;
+
+	private function new(lsp:Pointer<Lua_State>, tag:String) {
+		this.tag = tag;
+		this.lsp = lsp;
+		callbackReferences = new Map<String, Function>();
+	}
+
+	public function add(name:String, func:Function, fromtable:Bool = false) {
+		var byd:RawLuaState = lsp.raw;
+		var split:Array<String> = name.split(".");
+
+		if(split.length > 1 && fromtable) {
+			for(index=>key in split) {
+				if(index == 0) {
+					byd.getglobal(key);
+				} else if(index < split.length - 1) {
+					byd.getfield(-1, key);
+					//清除上一任表格
+					byd.remove(-2);
+				}
+				if(index < split.length - 1) {
+					if(byd.istable(-1) != 1) break;
+				} else {
+					callbackReferences.set(name, func);
+					byd.pushstring(tag);
+					byd.pushstring(name);
+					byd.pushcclosure(cpp.Function.fromStaticFunction(callbackHandler), 2);
+					byd.setfield(-2, key);
+				}
+			}
+			byd.pop(1);
+		} else {
+			name = split[0];
+			callbackReferences.set(name, func);
+			byd.pushstring(tag);
+			byd.pushstring(name);
+			byd.pushcclosure(cpp.Function.fromStaticFunction(callbackHandler), 2);
 			byd.setglobal(name);
 		}
-		#end
 	}
 
-	/**
-	 * 父愁者联盟
-	 * @param sl				  爷爷
-	 * @param name		  叔叔
-	 */
-	public static function removeCallback(sl:ScriptLua, name:String) {
-		if(sl._closed) return;
-		#if ALLOW_LUASCRIPT
-		final byd:LuaState = sl.heart;
+	public function remove(name:String, fromtable:Bool = false) {
+		var byd:RawLuaState = lsp.raw;
+		var split:Array<String> = name.split(".");
 
-		//注意：如果将name这个变量设置了其他值，可能会纯在误删的情况（
-		if(luaCallbacks.exists(sl.path)) {
-			final funcMap = luaCallbacks.get(sl.path);
-
-			if(funcMap != null && funcMap.exists(name)) {
-				var oldtop = byd.gettop();
+		if(split.length > 1 && fromtable) {
+			for(index=>key in split) {
+				if(index == 0) {
+					byd.getglobal(key);
+				} else if(index < split.length - 1) {
+					byd.getfield(-1, key);
+					//清除上一任表格
+					byd.remove(-2);
+				}
+				if(index < split.length - 1) {
+					if(byd.istable(-1) != 1) break;
+				} else {
+					if(callbackReferences.exists(name)) {
+						byd.getfield(-1, key);
+						if(byd.isnil(-1) != 1 && byd.isfunction(-1) == 1) {
+							byd.pushnil();
+							byd.setfield(-3, name);
+						}
+						byd.pop(1);
+						callbackReferences.remove(name);
+					}
+				}
+			}
+			byd.pop(1);
+		} else {
+			name = split[0];
+			if(callbackReferences.exists(name)) {
 				byd.getglobal(name);
-				if(byd.isnil(-1) != 1) {
+				if(byd.isnil(-1) != 1 && byd.isfunction(-1) == 1) {
 					byd.pushnil();
 					byd.setglobal(name);
 				}
 				byd.pop(1);
-
-				funcMap.remove(name);
+				callbackReferences.remove(name);
 			}
 		}
-		#end
 	}
 
-	/**
-	 * 孩子你无敌了
-	 * @param sl		  爷爷
-	 */
-	public static function clearCallback(sl:ScriptLua) {
-		if(sl._closed) return;
+	public function dispose() {
+		clear();
+		if(_pool.exists(tag)) _pool.remove(tag);
+	}
 
-		#if ALLOW_LUASCRIPT
-		if(luaCallbacks.exists(sl.path)) {
-			final funcMap = luaCallbacks.get(sl.path);
-			if(funcMap != null) {
-				for(sb in funcMap.keys()) {
-					removeCallback(sl, sb);
+	public function clear() {
+		for(key in callbackReferences.keys()) {
+			remove(key, key.contains("."));
+		}
+	}
+
+	public function toString():String {
+		return Std.string(callbackReferences);
+	}
+
+	@:noCompletion @:noUsing private static function callbackHandler(byd:RawLuaState) {
+		var prefix = byd.tostring(Lua.upvalueindex(1));
+		if(prefix == null) return 0;
+
+		var tag = byd.tostring(Lua.upvalueindex(2));
+		if(tag != null) {
+			var value = _pool.get(prefix);
+			if(value != null) {
+				final args:Array<Dynamic> = [];
+
+				for(count in 1...(byd.gettop() + 1)) {
+					args.push(byd.convertFromLua(count));
+				}
+
+				final func:Dynamic = value.callbackReferences.get(tag);
+				if(func != null && Reflect.isFunction(func)) {
+					byd.convertToLua(switch(Std.string(tag)) {
+						case "print":
+							Reflect.callMethod(null, func, [args]);
+						default: Reflect.callMethod(null, func, args);
+					});
+					return 1;
 				}
 			}
 		}
-		#end
-	}
-
-	/**
-	 * 谋权篡位家庭版
-	 * @param sl		  爷爷
-	 */
-	public static function logOffCallback(sl:ScriptLua) {
-		#if ALLOW_LUASCRIPT
-		if(luaCallbacks.exists(sl.path)) {
-			clearCallback(sl);
-			luaCallbacks.remove(sl.path);
-		}
-		#end
-	}
-
-	#if ALLOW_LUASCRIPT
-	@:noCompletion @:noUsing private static function callbackHandler(byd:LuaState) {
-		final tag = byd.convertFromLua(Lua.upvalueindex(1));
-		if(tag != null && tag is String) {
-			final funcMap = luaCallbacks.get(tag.substr(0, tag.lastIndexOf(":")));
-			var name:String = tag.substring(tag.lastIndexOf(":") + 1);
-			if(funcMap != null && funcMap.exists(name)) {
-				final n = byd.gettop();
-				var args:Array<Dynamic> = [];
-
-				for(at in 1...n + 1) {
-					args.push(byd.convertFromLua(at));
-				}
-
-				var ret:Dynamic = null;
-				switch(name) {
-					case "print":
-						ret = Reflect.callMethod(null, funcMap.get(name), [args]);
-					default:
-						ret = Reflect.callMethod(null, funcMap.get(name), args);
-				}
-				byd.convertToLua(ret);
-				return 1;
-			}
-		}
-
 		return 0;
 	}
+
 	#end
 }

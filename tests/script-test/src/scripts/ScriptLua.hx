@@ -5,9 +5,10 @@ import hxluajit.Types;
 import hxluajit.LuaL;
 import hxluajit.Lua;
 import scripts.luas.LuaUtil;
-import scripts.luas.LuaCallbackManager;
 #end
-import scripts.luas.LuaState;
+import scripts.luas.LuaGuiseFunction;
+import scripts.luas.LuaCallbackManager;
+import scripts.luas.RawLuaState;
 import sys.FileSystem;
 import sys.io.File;
 
@@ -37,18 +38,22 @@ class ScriptLua extends ScriptBase {
 	/**
 	 * 用于lua的虚拟交互（然后被调教成布尔值了）
 	 */
-	public var heart(default, null):Null<LuaState>;
+	public var heart(default, null):Null<RawLuaState>;
+	public var callbackManager:LuaCallbackManager;
+	private var luaFunctions:Array<LuaGuiseFunction>;
 
 	var code:Null<String>;
 
 	private var _closed:Bool;
 
 	override function init() {
-		_closed = false;
+		_closed = true;
 		#if ALLOW_LUASCRIPT
+		_closed = false;
+		luaFunctions = [];
 		heart = LuaL.newstate();
 		heart.openlibs();
-		LuaCallbackManager.registerCallback(this);
+		callbackManager = LuaCallbackManager.registerNewCallback(heart, this.toString());
 		#end
 	}
 
@@ -202,10 +207,10 @@ class ScriptLua extends ScriptBase {
 					heart.convertToLua(value);
 					heart.setglobal(name);
 				} else {
-					LuaCallbackManager.addCallback(this, name, value);
+					callbackManager.add(name, value);
 				}
 			} else {
-				for(index=>key in split) {
+				if(!Reflect.isFunction(value)) for(index=>key in split) {
 					if(index == 0) {
 						heart.getglobal(key);
 					} else if(index < split.length - 1) {
@@ -216,12 +221,13 @@ class ScriptLua extends ScriptBase {
 					if(index < split.length - 1) {
 						if(heart.istable(-1) != 1) break;
 					} else {
-						if(!Reflect.isFunction(value)) {
+						{
 							LuaUtil.convertToLua(heart, value);
 							heart.setfield(-2, key);
-						}//由于某些原因（其实就是懒），表格里不支持设置函数
+						}
 					}
 				}
+				else callbackManager.add(name, value, true);
 				heart.pop(1);
 			}
 		}
@@ -230,14 +236,16 @@ class ScriptLua extends ScriptBase {
 		focusOn = oldScript;
 	}
 
-	#if ALLOW_LUASCRIPT
 	override function execute() {
 		if(code != null && !_closed) {
+			#if ALLOW_LUASCRIPT
 			final origin = heart.gettop();
 			if(heart.dostring(code) == Lua.OK) {
 				var ret:Dynamic = null;
+			#end
 				final oldScript = focusOn;
 				focusOn = this;
+			#if ALLOW_LUASCRIPT
 				if(heart.gettop() > origin) {
 					final count:Int = Std.int(Math.abs(heart.gettop() - origin));
 					if(count == 1) ret = heart.convertFromLua(-1);
@@ -245,18 +253,20 @@ class ScriptLua extends ScriptBase {
 
 					heart.pop(count);
 				}
+			#end
 				focusOn = oldScript;
+			#if ALLOW_LUASCRIPT
 				return ret;
 			} else {
 				var content:ScriptInfo = parseErrorHandler(Std.string(heart.tostring(-1)));
 				heart.pop(1);
 				error(content);
 			}
+			#end
 		}
 
 		return null;
 	}
-	#end
 
 	/**
 	 * 用于切断lua交互虚拟机，释放内存
@@ -265,7 +275,14 @@ class ScriptLua extends ScriptBase {
 		if(_closed || heart == null) return;
 
 		#if ALLOW_LUASCRIPT
-		LuaCallbackManager.logOffCallback(this);
+		if(luaFunctions.length > 0) {
+			for(call in luaFunctions) {
+				call.destroy();
+			}
+		}
+		luaFunctions = null;
+
+		callbackManager.dispose();
 		heart.close();
 		#end
 		_closed = true;

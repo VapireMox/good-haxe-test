@@ -14,7 +14,7 @@ using Lambda;
  */
 @:access(scripts.luas.LuaCallbackManager)
 class LuaUtil {
-	public static function callFunctionWithoutName(byd:LuaState, args:Array<Dynamic>):Array<Dynamic>
+	public static function callFunctionWithoutName(byd:RawLuaState, args:Array<Dynamic>):Array<Dynamic>
 	{
 		#if ALLOW_LUASCRIPT
 		//排除已经在栈顶的function
@@ -54,7 +54,7 @@ class LuaUtil {
 		return null;
 	}
 
-	public static function convertFromLua(byd:LuaState, idx:Int):Dynamic {
+	public static function convertFromLua(byd:RawLuaState, idx:Int):Dynamic {
 		#if ALLOW_LUASCRIPT
 		switch(byd.type(idx)) {
 			case type if(type == Lua.TNIL):
@@ -67,6 +67,16 @@ class LuaUtil {
 				return byd.toboolean(idx) == 1;
 			case type if(type == Lua.TTABLE):
 				return convertFromLuaTable(byd, idx);
+			case type if(type == Lua.TFUNCTION):
+				final abs = byd.absindex(idx);
+				//将指定栈值推向栈顶，好确定真的是在引用这个
+				byd.pushvalue(abs);
+				byd.remove(abs);
+				var func = new LuaGuiseFunction(cpp.Pointer.fromRaw(byd), byd.ref(Lua.REGISTRYINDEX));
+				if(ScriptLua.focusOn != null) {
+					ScriptLua.focusOn.luaFunctions.push(func);
+				}
+				return func;
 			default:
 				trace('Warning: Cannot Covert This Type "${byd.typename(idx)}" From Lua');
 		}
@@ -75,7 +85,7 @@ class LuaUtil {
 		return null;
 	}
 
-	public static function convertToLua(byd:LuaState, value:Dynamic) {
+	public static function convertToLua(byd:RawLuaState, value:Dynamic) {
 		#if ALLOW_LUASCRIPT
 		switch(Type.typeof(value)) {
 			case TNull:
@@ -86,7 +96,7 @@ class LuaUtil {
 				byd.pushinteger(cast value);
 			case TBool:
 				byd.pushboolean(value == true ? 1 : 0);
-			case TObject if(!value is Class):
+			case TObject if(!(value is Class)):
 				LuaUtil.convertObjectToLuaTable(byd, value);
 			case TClass(String):
 				byd.pushstring(Std.string(value));
@@ -107,7 +117,7 @@ class LuaUtil {
 	 * @param idx		  栈数
 	 * @return				  返回栈数的绝对值
 	 */
-	public inline static function absindex(byd:LuaState, idx:Int):Int {
+	public inline static function absindex(byd:RawLuaState, idx:Int):Int {
 		#if ALLOW_LUASCRIPT
 		if(idx < 0) idx += byd.gettop() + 1;
 		#end
@@ -120,7 +130,7 @@ class LuaUtil {
 	 * @param idx		  栈数
 	 * @return				  返回1就是true，否则为false
 	 */
-	public inline static function isinteger(byd:LuaState, idx:Int):Int {
+	public inline static function isinteger(byd:RawLuaState, idx:Int):Int {
 		#if ALLOW_LUASCRIPT
 		if(byd.isnumber(idx) != 1) return 0;
 		final origin = byd.tonumber(idx);
@@ -131,7 +141,7 @@ class LuaUtil {
 	}
 
 	#if ALLOW_LUASCRIPT
-	@:noUsing @:noCompletion static function convertMapToLuaTable(byd:LuaState, map:haxe.Constraints.IMap<Dynamic, Dynamic>) {
+	@:noUsing @:noCompletion static function convertMapToLuaTable(byd:RawLuaState, map:haxe.Constraints.IMap<Dynamic, Dynamic>) {
 		byd.createtable(0, map.count());
 		for(key=>value in map) {
 			byd.convertToLua(key);
@@ -140,11 +150,11 @@ class LuaUtil {
 		}
 	}
 
-	@:noUsing @:noCompletion static function convertObjectToLuaTable(byd:LuaState, object:Dynamic) {
+	@:noUsing @:noCompletion static function convertObjectToLuaTable(byd:RawLuaState, object:Dynamic) {
 		final fields:Array<String> = Reflect.fields(object);
 
+		byd.createtable(0, fields.length);
 		if(fields.length > 0) {
-			byd.createtable(0, fields.length);
 			for(field in fields) {
 				byd.pushstring(field);
 				byd.convertToLua(Reflect.field(object, field));
@@ -153,7 +163,7 @@ class LuaUtil {
 		}
 	}
 
-	@:noUsing @:noCompletion static function convertArrayToLuaTable(byd:LuaState, array:Array<Dynamic>) {
+	@:noUsing @:noCompletion static function convertArrayToLuaTable(byd:RawLuaState, array:Array<Dynamic>) {
 		byd.createtable(0, array.length);
 		for(key=>ar in array) {
 			byd.pushinteger(cast (key + 1));
@@ -162,7 +172,7 @@ class LuaUtil {
 		}
 	}
 
-	@:noUsing @:noCompletion static function convertFromLuaTable(byd:LuaState, idx:Int):Dynamic {
+	@:noUsing @:noCompletion static function convertFromLuaTable(byd:RawLuaState, idx:Int):Dynamic {
 		if(sureConvertTableToArray(byd, idx)) {
 			var arr:Array<Dynamic> = [];
 
@@ -190,7 +200,7 @@ class LuaUtil {
 		return null;
 	}
 
-	@:noUsing @:noCompletion static inline function sureConvertTableToArray(byd:LuaState, idx:Int):Bool {
+	@:noUsing @:noCompletion static inline function sureConvertTableToArray(byd:RawLuaState, idx:Int):Bool {
 		var useArray:Bool = false;
 
 		if(idx < 0) idx = byd.absindex(idx);
