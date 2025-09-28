@@ -20,7 +20,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: setup haxe
-        uses: krdlab/setup-haxe@v4
+        uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.7
 
