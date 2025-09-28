@@ -1,0 +1,5 @@
+-main Main
+-lib luahscript
+
+-cpp export/cpp/
+-cmd .\export\cpp\Main.exe
